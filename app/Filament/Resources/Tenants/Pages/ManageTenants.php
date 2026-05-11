@@ -42,18 +42,43 @@ class ManageTenants extends ManageRecords
                     if (isset($response['status']) && $response['status'] === 'success') {
                         $count = 0;
                         foreach ($response['data'] as $remoteTenant) {
-                            if (!isset($remoteTenant['id'])) continue;
-                            $mainDomain = $remoteTenant['domains'][0]['domain'] ?? 'unknown';
+                            $remoteId = $remoteTenant['tenant_id'] ?? $remoteTenant['id'] ?? null;
+                            if (!$remoteId) continue;
                             
-                            Tenant::updateOrCreate(
-                                ['remote_id' => $remoteTenant['id'], 'server_id' => $server->id],
+                            $tenant = Tenant::updateOrCreate(
+                                ['remote_id' => (string) $remoteId, 'server_id' => $server->id],
                                 [
-                                    'name' => $remoteTenant['name'] ?? 'Unnamed Site',
-                                    'domain' => $mainDomain,
+                                    'name' => $remoteTenant['tenant_name'] ?? $remoteTenant['name'] ?? 'Unnamed Site',
+                                    'domain' => $remoteTenant['domain'] ?? 'unknown',
                                     'status' => 'active',
                                     'data' => $remoteTenant,
                                 ]
                             );
+
+                            // Sync Primary Domain
+                            if ($tenant->domain && $tenant->domain !== 'unknown') {
+                                $tenant->domains()->updateOrCreate(
+                                    ['domain' => $tenant->domain],
+                                    ['type' => 'primary']
+                                );
+                            }
+
+                            // Sync Aliases
+                            if (isset($remoteTenant['aliases']) && is_array($remoteTenant['aliases'])) {
+                                foreach ($remoteTenant['aliases'] as $alias) {
+                                    $tenant->domains()->updateOrCreate(
+                                        ['domain' => $alias],
+                                        ['type' => 'alias']
+                                    );
+                                }
+                                
+                                // Cleanup old aliases not in remote
+                                $tenant->domains()
+                                    ->where('type', 'alias')
+                                    ->whereNotIn('domain', $remoteTenant['aliases'])
+                                    ->delete();
+                            }
+
                             $count++;
                         }
 
@@ -92,7 +117,7 @@ class ManageTenants extends ManageRecords
 
                     if (isset($response['status']) && $response['status'] === 'success') {
                         // 2. Simpan ke Database Lokal dengan remote_id dari API
-                        return $model::create([
+                        $tenant = $model::create([
                             'name' => $data['name'],
                             'domain' => $data['domain'],
                             'server_id' => $data['server_id'],
@@ -100,6 +125,14 @@ class ManageTenants extends ManageRecords
                             'remote_id' => $response['data']['tenant_id'] ?? null, // Ambil tenant_id dari respon API
                             'data' => $response['data'] ?? [],
                         ]);
+
+                        // Simpan domain utama ke tabel domains
+                        $tenant->domains()->create([
+                            'domain' => $tenant->domain,
+                            'type' => 'primary',
+                        ]);
+
+                        return $tenant;
                     }
 
                     // Jika API Gagal

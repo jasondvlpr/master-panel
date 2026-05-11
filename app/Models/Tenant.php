@@ -28,6 +28,11 @@ class Tenant extends Model
         return $this->belongsTo(Server::class);
     }
 
+    public function domains()
+    {
+        return $this->hasMany(TenantDomain::class);
+    }
+
     public function managedDomain()
     {
         return $this->belongsTo(ManagedDomain::class);

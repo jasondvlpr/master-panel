@@ -115,24 +115,43 @@ class TenantResource extends Resource
                     '))
                     ->searchable(),
 
-                // Kolom Domain: CENTER ALIGN
+                // Kolom Endpoints: LEFT ALIGN, Custom UI
                 Tables\Columns\TextColumn::make('domain')
-                    ->label('DOMAIN')
-                    ->alignCenter()
+                    ->label('ENDPOINTS')
                     ->searchable()
+                    ->disabledClick()
                     ->formatStateUsing(fn ($state, Tenant $record) => new HtmlString('
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;" wire:click.stop="">
+                            <!-- Master Domain -->
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-weight: 700; color: #4f46e5; font-size: 14px;">'.$state.'</span>
-                                <span style="background: #eef2ff; color: #6366f1; font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid rgba(99, 102, 241, 0.1);">MASTER</span>
+                                <span style="font-weight: 800; color: #4f46e5; font-size: 12px; letter-spacing: -0.01em;">'.$state.'</span>
+                                <span style="background: #eef2ff; color: #6366f1; font-size: 8px; font-weight: 900; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(99, 102, 241, 0.1);">MASTER</span>
                             </div>
-                            <div style="display: inline-flex; align-items: center; gap: 5px; cursor: pointer; opacity: 0.7; transition: all 0.2s;" 
-                                 onmouseover="this.style.opacity=1; this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.opacity=0.7; this.style.transform=\'translateY(0)\'"
-                                 wire:click="mountTableAction(\'add_alias_custom\', \''.$record->id.'\')">
-                                <svg style="width: 12px; height: 12px; color: #94a3b8;" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+
+                            <!-- Alias List -->
+                            <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+                                '. $record->domains->where('type', 'alias')->map(fn($d) => '
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-weight: 800; color: #4f46e5; font-size: 12px; letter-spacing: -0.01em;">'.$d->domain.'</span>
+                                        <div style="cursor: pointer; color: #ef4444; opacity: 0.6; transition: all 0.2s;" 
+                                             onmouseover="this.style.opacity=1; this.style.transform=\'scale(1.1)\'" onmouseout="this.style.opacity=0.6; this.style.transform=\'scale(1)\'"
+                                             wire:click.stop="mountTableAction(\'delete_alias\', \''.$record->id.'\', {domain: \''.$d->domain.'\'})">
+                                            <svg style="width: 12px; height: 12px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 6.62m-2.52 0L11.55 9m10.33-3.11c.18.02.36.05.53.07.42.06.74.43.74.85v1.07c0 .42-.32.79-.74.85-.17.02-.36.04-.53.07m-1.77 1.55-.42 10.45a2.25 2.25 0 0 1-2.24 2.16H7.48a2.25 2.25 0 0 1-2.24-2.16L4.82 17.5m15.02-3.55a2.25 2.25 0 0 0-2.24-2.16H6.42a2.25 2.25 0 0 0-2.24 2.16M18 4V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v1m12 0H6" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                ')->implode('') .'
+                            </div>
+
+                            <!-- Add Alias Action Trigger -->
+                            <div style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #94a3b8; margin-top: 2px; transition: all 0.2s;" 
+                                 onmouseover="this.style.color=\'#64748b\'" onmouseout="this.style.color=\'#94a3b8\'"
+                                 wire:click.stop="mountTableAction(\'add_alias_custom\', \''.$record->id.'\')">
+                                <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
-                                <span style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">ADD ALIAS</span>
+                                <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">ADD ALIAS</span>
                             </div>
                         </div>
                     ')),
@@ -311,6 +330,12 @@ class TenantResource extends Resource
                         $result = $service->addDomainAlias($record->remote_id, $data['domain']);
                         
                         if (isset($result['status']) && $result['status'] === 'success') {
+                            // Simpan ke database lokal
+                            $record->domains()->updateOrCreate(
+                                ['domain' => $data['domain']],
+                                ['type' => 'alias']
+                            );
+
                             Notification::make()
                                 ->title('Domain Alias Added')
                                 ->success()
@@ -323,8 +348,37 @@ class TenantResource extends Resource
                                 ->body($result['message'] ?? 'The server rejected the alias.')
                                 ->send();
                         }
-                    })
-                    ->hidden(),
+                    }),
+                Action::make('delete_alias')
+                    ->label('Delete Alias')
+                    ->modalHeading('Delete Domain Alias')
+                    ->modalDescription('Are you sure you want to remove this alias from the remote server?')
+                    ->modalWidth('md')
+                    ->modalAlignment('center')
+                    ->modalFooterActionsAlignment('center')
+                    ->action(function (Tenant $record, array $arguments) {
+                        $domain = $arguments['domain'] ?? null;
+                        
+                        if (!$domain || !$record->remote_id || !$record->server) {
+                            Notification::make()->title('Missing data or remote connection')->danger()->send();
+                            return;
+                        }
+
+                        $service = new TenantService($record->server->api_endpoint, $record->server->api_key);
+                        $result = $service->removeDomainAlias($record->remote_id, $domain);
+                        
+                        if (isset($result['status']) && $result['status'] === 'success') {
+                            $record->domains()->where('domain', $domain)->delete();
+                            Notification::make()->title('Domain Alias Removed')->success()->send();
+                        } else {
+                            Notification::make()
+                                ->title('Removal Failed')
+                                ->danger()
+                                ->body($result['message'] ?? 'The server rejected the request.')
+                                ->send();
+                        }
+                    }),
+
                 DeleteAction::make()
                     ->iconButton()
                     ->before(function (Tenant $record, DeleteAction $action) {
@@ -348,6 +402,11 @@ class TenantResource extends Resource
             ->headerActions([
                 // Moved to ManageTenants page header
             ]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['domains', 'server']);
     }
 
     public static function getPages(): array

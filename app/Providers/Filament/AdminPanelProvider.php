@@ -95,11 +95,16 @@ class AdminPanelProvider extends PanelProvider
                         .fi-ta-header-cell {
                             background: transparent !important;
                             border-bottom: 1px solid var(--border-subtle) !important;
+                            border-right: 1px solid var(--border-subtle) !important;
                             padding: 16px 24px !important;
                             text-transform: uppercase !important;
                             letter-spacing: 0.05em !important;
                             font-size: 0.75rem !important;
                             color: var(--text-soft) !important;
+                        }
+
+                        .fi-ta-header-cell:last-child {
+                            border-right: none !important;
                         }
 
                         .fi-ta-record { 
@@ -114,9 +119,14 @@ class AdminPanelProvider extends PanelProvider
                         .fi-ta-cell { 
                             border: none !important;
                             border-bottom: 1px solid var(--border-subtle) !important; 
+                            border-right: 1px solid var(--border-subtle) !important;
                             padding: 16px 24px !important; 
                         }
                         
+                        .fi-ta-cell:last-child {
+                            border-right: none !important;
+                        }
+
                         /* Remove bottom border on last row */
                         .fi-ta-record:last-child .fi-ta-cell {
                             border-bottom: none !important;

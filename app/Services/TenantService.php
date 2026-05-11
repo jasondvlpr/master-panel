@@ -69,4 +69,12 @@ class TenantService
 
         return $response->json();
     }
+    public function removeDomainAlias($tenantId, string $domain)
+    {
+        $base = str_replace('/tenants', '', $this->baseUrl);
+        $url = "{$base}/tenants/{$tenantId}/domains/{$domain}";
+        
+        $response = $this->getRequest()->delete($url);
+        return $response->json();
+    }
 }
