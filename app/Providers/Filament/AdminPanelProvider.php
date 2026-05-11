@@ -172,6 +172,7 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
             ->navigationGroups([
+                'Personal',
                 'Tenant Management',
                 'Network & DNS',
                 'Infrastructure',
