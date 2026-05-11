@@ -1,59 +1,86 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# InfraPanel - Multi-Tenant Infrastructure & Domain Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel)
+![Filament](https://img.shields.io/badge/Filament-3.x-FBA918?style=for-the-badge&logo=filament)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-API-F38020?style=for-the-badge&logo=cloudflare)
 
-## About Laravel
+InfraPanel is a robust, centralized dashboard built with **Laravel 12** and **Filament v3**, designed to seamlessly manage multi-tenant infrastructure, remote server nodes, and complex Cloudflare DNS configurations from a single, elegant interface.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Key Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Advanced Cloudflare Integration
+- **Global Sync:** Fetch and synchronize zones across multiple Cloudflare accounts simultaneously.
+- **Live DNS Manager:** Create, view, and delete DNS records directly from a custom, high-speed Livewire modal without leaving the dashboard.
+- **Automated Subdomain Tracking:** Deep scans DNS records (A, AAAA, CNAME) to automatically extract and list subdomains alongside root domains.
+- **Direct DNS Push:** Push domain routing to remote server IP addresses with a single click.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Multi-Tenant Architecture (Client Registry)
+- Manage clients (tenants) and link them directly to registered Cloudflare domains.
+- Assign tenants to specific remote servers/nodes.
+- Automated API communication with remote servers for tenant provisioning and domain alias registration.
 
-## Learning Laravel
+### 3. Infrastructure Management
+- Register and monitor multiple remote Web Servers.
+- Store secure API Endpoints and Keys to enable automated multi-server task distribution.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 4. Premium SaaS UI/UX
+- Completely customized Filament dashboard featuring a modern **Purple, Blue, and White** color composition.
+- Re-engineered, "borderless" SaaS-style tables for cleaner data visualization.
+- Responsive, pill-shaped action buttons and soft gradient accents for a highly polished administrative experience.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🛠️ Technology Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Framework:** Laravel 12.x
+- **Admin Panel:** Filament v3 (TALL Stack - Tailwind, Alpine.js, Laravel, Livewire)
+- **Database:** MySQL
+- **Styling:** Custom Inline & Filament Hooks (Optimized to bypass local Vite compilation bottlenecks)
+- **Integrations:** Cloudflare REST API v4
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## ⚙️ Installation & Setup
 
-## Contributing
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/jasondvlpr/master-panel.git
+   cd master-panel
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install dependencies:**
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Code of Conduct
+3. **Environment Setup:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Configure your database credentials in the `.env` file.*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Run Migrations:**
+   ```bash
+   php artisan migrate
+   ```
 
-## Security Vulnerabilities
+5. **Start the Development Server:**
+   ```bash
+   php artisan serve
+   ```
+   *Access the panel at: `http://localhost:8000/admin`*
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🛡️ Security
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This system manages critical infrastructure credentials (Cloudflare API Tokens, Server Root API Keys). It is highly recommended to:
+- Run this application behind a strict SSL/HTTPS connection.
+- Restrict access to the `/admin` path using VPN or specific IP whitelists.
+- Regularly rotate Cloudflare API tokens.
+
+---
+
+*Built with ❤️ for scalable infrastructure management.*
