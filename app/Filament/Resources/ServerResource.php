@@ -48,6 +48,7 @@ class ServerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->weight('bold')
@@ -58,6 +59,27 @@ class ServerResource extends Resource
                     ->icon('heroicon-m-globe-alt')
                     ->iconColor('primary')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(function (Server $record) {
+                        // Sanitize IP to prevent command injection, safely without quotes for Windows ping
+                        $ip = preg_replace('/[^a-zA-Z0-9.-]/', '', $record->ip);
+                        
+                        if (empty($ip)) return 'Offline';
+
+                        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                            exec("ping -n 1 -w 1000 " . $ip, $output, $status);
+                        } else {
+                            exec("ping -c 1 -W 1 " . escapeshellarg($ip), $output, $status);
+                        }
+                        return $status === 0 ? 'Online' : 'Offline';
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Online' => 'success',
+                        'Offline' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('api_endpoint')
                     ->label('API Endpoint')
                     ->color('gray')

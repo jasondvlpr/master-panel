@@ -85,6 +85,12 @@ class CloudflareDomains extends Page implements HasTable
                         ->options(CloudflareAccount::pluck('name', 'id'))
                         ->required()
                         ->native(false),
+                    \Filament\Forms\Components\Select::make('server_id')
+                        ->label('Select Server (for DNS)')
+                        ->options(\App\Models\Server::pluck('name', 'id'))
+                        ->nullable()
+                        ->native(false)
+                        ->helperText('Jika server dipilih, Record DNS tipe A (@ dan www) ke IP server ini akan ditambahkan otomatis.'),
                 ])
                 ->action(function (array $data) {
                     $account = CloudflareAccount::find($data['cloudflare_account_id']);
@@ -105,6 +111,17 @@ class CloudflareDomains extends Page implements HasTable
                                 'last_synced_at' => now(),
                             ]
                         );
+
+                        // Tambahkan DNS Record jika Server dipilih
+                        if (!empty($data['server_id'])) {
+                            $server = \App\Models\Server::find($data['server_id']);
+                            if ($server && $server->ip) {
+                                // Add @ record
+                                $cf->addDnsRecord($zone['id'], 'A', '@', $server->ip, true);
+                                // Add www record
+                                $cf->addDnsRecord($zone['id'], 'A', 'www', $server->ip, true);
+                            }
+                        }
 
                         \Filament\Notifications\Notification::make()
                             ->title('Domain Added Successfully')
