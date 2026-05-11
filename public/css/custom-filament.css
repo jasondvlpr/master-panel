@@ -1,0 +1,75 @@
+/* Estetika Dashboard Premium */
+
+:root {
+    --primary-font: 'Outfit', 'Inter', sans-serif;
+}
+
+.fi-main {
+    font-family: var(--primary-font);
+    background-color: #fcfcfd;
+}
+
+/* Tabel Tanpa Border (Clean) */
+.fi-ta-ctn {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.fi-ta-table {
+    border-collapse: separate !important;
+    border-spacing: 0 12px !important; /* Jarak antar baris */
+}
+
+.fi-ta-header-cell {
+    background: transparent !important;
+    border: none !important;
+    text-transform: uppercase;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em;
+    color: #94a3b8 !important;
+    padding-bottom: 15px !important;
+}
+
+.fi-ta-record {
+    background: white !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid #f1f5f9 !important;
+    transition: all 0.2s ease;
+    border-radius: 16px !important;
+}
+
+.fi-ta-record:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important;
+    border-color: #e2e8f0 !important;
+}
+
+.fi-ta-cell {
+    border: none !important;
+    padding: 20px 15px !important;
+}
+
+/* Sidebar & Navigasi */
+.fi-sidebar {
+    border-right: 1px solid #f1f5f9 !important;
+}
+
+.fi-sidebar-item-button {
+    border-radius: 12px !important;
+    margin: 2px 8px !important;
+}
+
+.fi-sidebar-item-active {
+    background-color: #f8fafc !important;
+}
+
+/* Badge Premium */
+.fi-badge {
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 4px 10px !important;
+}
